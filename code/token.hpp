@@ -12,10 +12,13 @@ class token_323 {
         // Default constructor
         token_323() {}
 
+        // Accessor and modifier functions
         std::string token() {}
         std::string lexeme() {}
         void token_update(std::string token) {}
         void lexeme_update(std::string token) {}
+
+        // Functions to help print out rules
         void rule_print_helper() {}
         void start_print_helper() {}
         void token_print_helper() {}
