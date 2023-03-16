@@ -12,7 +12,6 @@
 #include "token.hpp"
 #include "table.hpp"
 using namespace std;
-
 token_323 lexer_323(ifstream& input_file);
 
 

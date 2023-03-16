@@ -8,9 +8,6 @@
 #include <fstream>
 #include <sstream>
 #include "lexer.hpp"
-#include "input_type.hpp"
-#include "token.hpp"
-#include "table.hpp"
 using namespace std;
 
 
