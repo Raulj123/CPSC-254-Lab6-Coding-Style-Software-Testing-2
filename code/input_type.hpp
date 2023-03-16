@@ -28,3 +28,5 @@ bool is_accepting_intreal(int state);
 //Determine token type based on final state
 std::string ending_state_intreal(int state);
 std::string ending_state_id(int state);
+
+

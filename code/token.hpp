@@ -2,7 +2,7 @@
 #define TOKEN_H
 
 #include <string>
-
+#include "table.hpp"
 class token_323 {
     private:
         std::string token_323_;
@@ -11,6 +11,9 @@ class token_323 {
     public:
         // Default constructor
         token_323() {}
+        std::vector<instruction_table> all_instructions;
+        std::vector<std::string> rule_holder;
+
 
         // Accessor and modifier functions
         std::string token() {}

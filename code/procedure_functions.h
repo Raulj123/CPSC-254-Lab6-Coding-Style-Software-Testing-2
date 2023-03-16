@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "lexer.hpp"
-
+#include "input_type.hpp"
+#include "token.hpp"
 
 bool identifier_helper(token_323 input_token);
 
@@ -9,7 +9,6 @@ bool identifier_helper(token_323 input_token);
 //R28. <Primary> :: = <Identifier> | <Integer> | <Identifier>  (<IDs>) | (<Expression>) | <Real> | true | false
 //---------------------------------------------------------------------------------------------------
 bool procedure_Primary(vector<token_323>& all_tokens, int& loc);
-
 //R27. <Factor> :: = -<Primary> | <Primary>
 //---------------------------------------------------------------------------------------------------
 bool procedure_Factor(vector<token_323>& all_tokens, int& loc);
