@@ -11,9 +11,11 @@
 #include <sstream>
 #include "token.hpp"
 #include "lexer.hpp"
-#include "./table.hpp"
+
 using namespace std;
 
+std::vector<instruction_table> all_instructions;
+std::vector<std::string> rule_holder;
 
 token_323::token_323() {
     token_323_ = "none";
