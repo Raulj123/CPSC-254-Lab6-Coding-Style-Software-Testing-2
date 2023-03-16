@@ -1,4 +1,4 @@
-#include "./lexer.hpp"
+#include "lexer.hpp"
 
 
 struct instruction_table

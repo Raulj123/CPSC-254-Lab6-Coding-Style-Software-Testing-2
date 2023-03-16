@@ -1,10 +1,9 @@
 ﻿#pragma once
 #include "input_type.hpp"
 #include "token.hpp"
+#include "lexer.hpp"
 
 bool identifier_helper(token_323 input_token);
-
-
 
 //R28. <Primary> :: = <Identifier> | <Integer> | <Identifier>  (<IDs>) | (<Expression>) | <Real> | true | false
 //---------------------------------------------------------------------------------------------------

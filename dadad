@@ -1,0 +1,83 @@
+[33mcommit c0cd47d4bf9cbd8ddc66f0d6a22a24949521b33a[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Mario Linares <mariolinares@csu.fullerton.edu>
+Date:   Thu Mar 16 12:48:52 2023 -0700
+
+    Include header files in lexer
+
+[33mcommit 11a14be58e844133558d24c0267be9968368176f[m
+Author: Raul <jarquinr121@csu.fullerton.edu>
+Date:   Thu Mar 16 12:45:18 2023 -0700
+
+    Seperate Table strcuts into two file
+
+[33mcommit b1cc1c1f52336b643293243bcdac6100265d697c[m
+Author: Mario Linares <mariolinares@csu.fullerton.edu>
+Date:   Fri Mar 10 14:16:47 2023 -0800
+
+    Remove the input type functions, token_323 class
+
+[33mcommit 8032f42f2435b38c23a2ffa68969a0238603533e[m
+Author: Mario Linares <mariolinares@csu.fullerton.edu>
+Date:   Fri Mar 10 14:04:13 2023 -0800
+
+    Added comments and spacing between functions
+
+[33mcommit 54d7fe67c5b837eec350bf017e23ecc74294e51a[m
+Author: Mario Linares <mariolinares@csu.fullerton.edu>
+Date:   Fri Mar 10 13:57:26 2023 -0800
+
+    Add comments to token header
+
+[33mcommit 49f2e9b9e1eb628ab0be1f5a9fe45ae0dd0bbde5[m
+Merge: c3c0e91 061a7fc
+Author: Mario Linares <mariolinares@csu.fullerton.edu>
+Date:   Fri Mar 10 12:22:25 2023 -0800
+
+    Merge pull request #2 from Raulj123/token_323
+    
+    Add token_323 class in it's own header and implementation file
+
+[33mcommit 061a7fcc320e401bf90b8dd1be0049d3e87c2633[m[33m ([m[1;31morigin/token_323[m[33m)[m
+Author: Mario Linares <mariolinares@csu.fullerton.edu>
+Date:   Fri Mar 10 12:17:17 2023 -0800
+
+    Add token_323 class in it's own header and implementation file
+
+[33mcommit c3c0e91a1da8cf2d4947a730d339464185058638[m
+Merge: d84eff9 255e6a8
+Author: Raul Jarquin <112786129+Raulj123@users.noreply.github.com>
+Date:   Thu Mar 9 13:41:21 2023 -0800
+
+    Merge pull request #1 from Raulj123/input_type
+    
+    Add new header & cpp file
+
+[33mcommit 255e6a80358047d0cde705f84617c0c20117cdcc[m[33m ([m[1;31morigin/input_type[m[33m)[m
+Author: Raul <jarquinr121@csu.fullerton.edu>
+Date:   Thu Mar 9 13:39:49 2023 -0800
+
+    Add new header & cpp file
+
+[33mcommit d84eff9dcd2baf0a340945fa5ff2e64264b07658[m
+Author: Mario Linares <mariolinares@csu.fullerton.edu>
+Date:   Thu Mar 9 13:12:31 2023 -0800
+
+    Add the unedited code
+
+[33mcommit 29d325bf8a2b24e399e12ca08d990657d1515f90[m
+Author: Raul <jarquinr121@csu.fullerton.edu>
+Date:   Thu Mar 9 12:25:47 2023 -0800
+
+    Adding folder & files
+
+[33mcommit 3562487cad92d1d7c7d809826ac483f2f4644604[m
+Author: Raul Jarquin <112786129+Raulj123@users.noreply.github.com>
+Date:   Thu Mar 9 12:19:08 2023 -0800
+
+    Update README.md
+
+[33mcommit ac3ff0b718879aa8caba3d9ea9b575bdaf753951[m
+Author: Raul Jarquin <112786129+Raulj123@users.noreply.github.com>
+Date:   Thu Mar 9 12:17:49 2023 -0800
+
+    Initial commit

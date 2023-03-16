@@ -41,6 +41,9 @@ The logic of all recursive functions is in this form:
 #include <fstream>
 #include <sstream>
 #include "procedure_functions.h"
+#include "input_type.hpp"
+#include "token.hpp"
+
 using namespace std;
 
 // a helper function to help recognize identifier
