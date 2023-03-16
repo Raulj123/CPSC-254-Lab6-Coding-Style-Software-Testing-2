@@ -1,4 +1,4 @@
-#include "table.hpp"
+#include "./table.hpp"
 
 
 void instruction_table::new_instruction(string ope, string opre){
@@ -7,7 +7,7 @@ void instruction_table::new_instruction(string ope, string opre){
         oprnd = opre;
 }
  
-
+ 
 void instruction_table::print_ins(ofstream& outfile)
 {
     std::cout << op << "     " << oprnd << "\n";
