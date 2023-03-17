@@ -1,5 +1,15 @@
-
+#pragma once
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <cctype>
+#include <algorithm>
+#include <vector>
+#include <fstream>
+#include <sstream>
 #include "input_type.hpp"
+using namespace std;
+
 
 //functions used to determine input type-----------------------------------
 //return 1 if input is equal to a char in string
@@ -45,6 +55,7 @@ bool isKeyword(std::string input) {
     return 0;
 
 }// isdigit() and isalpha() are used to determine d and l
+
 
 
 //check which type of "other" input it is---------------------------------------

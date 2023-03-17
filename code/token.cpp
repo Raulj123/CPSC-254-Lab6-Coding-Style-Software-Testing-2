@@ -1,5 +1,3 @@
-// class token implementaton
-#include <iostream>
 #pragma once
 #include <iostream>
 #include <iomanip>
@@ -10,12 +8,8 @@
 #include <fstream>
 #include <sstream>
 #include "token.hpp"
-#include "lexer.hpp"
-
 using namespace std;
 
-std::vector<instruction_table> all_instructions;
-std::vector<std::string> rule_holder;
 
 token_323::token_323() {
     token_323_ = "none";
@@ -58,4 +52,3 @@ void token_323::token_print_helper() {
     //std::cout << lexemep << tokenp << "\n";
     //outfile << lexemep << tokenp << "\n";
 }
-
