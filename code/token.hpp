@@ -7,6 +7,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include "input_type.hpp"
 using namespace std;
 
 
