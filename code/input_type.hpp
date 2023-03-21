@@ -7,8 +7,6 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include "lexer.hpp"
-#include "token.hpp"
 using namespace std;
 
 //functions used to determine input type-----------------------------------
