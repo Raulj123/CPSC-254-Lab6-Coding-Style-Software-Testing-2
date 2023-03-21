@@ -1,0 +1,35 @@
+Test case #1: Primary
+	input: Temp Integer
+	Expected: Pass
+	
+Test case #2: Primary
+	input: 10
+	Expected: Fail
+		
+Test case #3: Primary
+	input: temp+i
+	Expected: Pass
+		
+Test case #4: Term
+	input: x
+	Expected: Pass
+	
+Test case #5: Term
+	input: 1.56*(x+y)
+	Expected: Pass
+	
+Test case #6: Term
+	input: 3 xx / 7
+	Expected: Fail due to spacing 
+	
+Test case#7: Expression
+	input: int a;
+	Expected: Fail, due to the int?
+	
+Test case#8: Expression
+	input: a=10;
+	Expected: Pass
+	
+Test case#9: Expression
+	input: a+=10
+	Expected: Fail, due to term and expression?

@@ -1,0 +1,35 @@
+Test case #1: Primary
+	Result: Passed 
+	why?: Has necessary values
+		
+Test case #2: Primary
+	Result: Failed
+	why?: Not enough identifiers 
+		
+Test case #3: Primary
+	Result: Passed
+	why?: Has necessary values
+		
+Test case #4: Term
+	Result: Passed
+	Why?: Correct Input 
+	
+Test case #5: Term
+	Result: Passed
+	Why?: Correct Input
+	
+Test case #6: Term
+	Result: Passed
+	Why?: Spacing does not matter? 
+	 
+Test case#7: Expression
+	Result: Failed
+	why?: Int?
+	
+Test case#8: Expression
+	Result: Pass
+	why?: right expression
+	
+Test case#8: Expression
+	Result: Failed
+	why?: Expected term and expression. 
