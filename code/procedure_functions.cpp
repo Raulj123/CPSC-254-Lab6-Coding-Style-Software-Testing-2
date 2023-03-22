@@ -43,6 +43,27 @@ The logic of all recursive functions is in this form:
 #include "procedure_functions.h"
 using namespace std;
 
+
+struct var_helper
+{
+	int loc_helper;
+	int rule_helper;
+	std::vector<std::string>::iterator it;
+	
+	int decider = 0;
+	bool return_holder = false;
+	token_323 token_holder;
+	
+	var_helper(int loc, vector<token_323>& all_tokens)
+	{
+		loc_helper = loc;
+		rule_helper = all_tokens[loc].rule_holder.size();
+		std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+		token_holder = all_tokens[loc];  //get token from collection
+	}
+};
+
+
 // a helper function to help recognize identifier
 bool identifier_helper(token_323 input_token)
 {
@@ -60,21 +81,15 @@ bool identifier_helper(token_323 input_token)
 //---------------------------------------------------------------------------------------------------
 bool procedure_IDs(vector<token_323>& all_tokens, int& loc)//procedure for <IDs>
 {
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-	
-	int decider = 0;
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];//get token from collection	
-	if (identifier_helper(token_holder))
+	var_helper var(loc, all_tokens);
+
+	if (identifier_helper(var.token_holder))
 	{
 		//token_holder.token_print_helper();
 		loc++;
 		
-		token_holder = all_tokens[loc];//check what is next token
-		if (token_holder.lexeme() == ",")//test if it is case <IDs> -> <Identifier>, <IDs>
+		var.token_holder = all_tokens[loc];//check what is next token
+		if (var.token_holder.lexeme() == ",")//test if it is case <IDs> -> <Identifier>, <IDs>
 		{
 			//token_holder.token_print_helper();
 			loc++;
@@ -82,32 +97,32 @@ bool procedure_IDs(vector<token_323>& all_tokens, int& loc)//procedure for <IDs>
 			if (procedure_IDs(all_tokens, loc))
 			{
 				std::string output_str = "<IDs> -> <Identifier> \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else //test failed, wrong gramma, output error message
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting <IDs>\n";
-				return_holder = false;
+				var.return_holder = false;
 
 			}
 		}
 		else// if it is not, then is case <IDs> -> <Identifier>
 		{
 			std::string output_str = "<IDs> -> <Identifier>, <IDs> \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
-			return_holder = true;
+			var.return_holder = true;
 		}
 	}
 	else //not this gramma, return false
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -118,49 +133,43 @@ bool procedure_IDs(vector<token_323>& all_tokens, int& loc)//procedure for <IDs>
 bool procedure_Primary(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.token() == "Identifier")//<Identifier> 
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.token() == "Identifier")//<Identifier> 
 	{
 
 		//instruction pushm
 		instruction_table temp_ins;
-		temp_ins.new_instruction("PUSHM", token_holder.lexeme());
+		temp_ins.new_instruction("PUSHM", var.token_holder.lexeme());
 		all_tokens[0].all_instructions.push_back(temp_ins);
 
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == "(")//(
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == "(")//(
 		{
 			//token_holder.token_print_helper();
 			loc++;
 			if (procedure_IDs(all_tokens, loc))//<IDs>
 			{
-				token_holder = all_tokens[loc];
-				if (token_holder.lexeme() == ")")//)
+				var.token_holder = all_tokens[loc];
+				if (var.token_holder.lexeme() == ")")//)
 				{
 					//token_holder.token_print_helper();
 					loc++;
 
 					std::string output_str = "<Primary> -> <Identifier> ( <IDs> )\n";
-					all_tokens[loc_helper].rule_holder.push_back(output_str);
+					all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 					//std::cout << output_str;
 					
-					return_holder = true;
+					var.return_holder = true;
 				}
 				else
 				{
 					loc--;
 					loc--;
 					loc--;
-					return_holder = false;
+					var.return_holder = false;
 					std::cout << "error, expecting ) \n";
 				}
 			}
@@ -168,7 +177,7 @@ bool procedure_Primary(vector<token_323>& all_tokens, int& loc)
 			{
 				loc--;
 				loc--;
-				return_holder = false;
+				var.return_holder = false;
 				std::cout << "error, expecting <IDs> \n";
 			}
 		}
@@ -176,73 +185,73 @@ bool procedure_Primary(vector<token_323>& all_tokens, int& loc)
 		{
 			
 			std::string output_str = "<Primary> -> <Identifier> \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
-			return_holder = true;
+			var.return_holder = true;
 		}
 	}
-	else if (token_holder.token() == "Integer") // <Integer> 
+	else if (var.token_holder.token() == "Integer") // <Integer> 
 	{
 		//instruction pushi
 		instruction_table temp_ins;
-		temp_ins.new_instruction("PUSHI", token_holder.lexeme());
+		temp_ins.new_instruction("PUSHI", var.token_holder.lexeme());
 		all_tokens[0].all_instructions.push_back(temp_ins);
 
 
 		//token_holder.token_print_helper();
 		loc++;
 		std::string output_str = "<Primary> -> <Integer>  \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	else if (token_holder.lexeme() == "(")//( <Expression> ) 
+	else if (var.token_holder.lexeme() == "(")//( <Expression> ) 
 	{
 		
 		//token_holder.token_print_helper();
 		loc++;
 		if (procedure_Expression(all_tokens, loc))//<Expression>
 		{
-			token_holder = all_tokens[loc];
-			if (token_holder.lexeme() == ")")// )
+			var.token_holder = all_tokens[loc];
+			if (var.token_holder.lexeme() == ")")// )
 			{
 				//token_holder.token_print_helper();
 				loc++;
 
 				std::string output_str = "<Primary> -> ( <Expression> ) \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting ) \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Expression> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
-	else if (token_holder.token() == "Real")// <Real> 
+	else if (var.token_holder.token() == "Real")// <Real> 
 	{
 		//token_holder.token_print_helper();
 		loc++;
 
 		std::string output_str = "<Primary> -> <Real> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	else if (token_holder.lexeme() == "true")//True 
+	else if (var.token_holder.lexeme() == "true")//True 
 	{
 		//instruction push true
 		instruction_table temp_ins;
@@ -254,12 +263,12 @@ bool procedure_Primary(vector<token_323>& all_tokens, int& loc)
 		loc++;
 		
 		std::string output_str = "<Primary> -> true \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	else if (token_holder.lexeme() == "false")//false
+	else if (var.token_holder.lexeme() == "false")//false
 	{
 
 		//instruction push true
@@ -271,16 +280,16 @@ bool procedure_Primary(vector<token_323>& all_tokens, int& loc)
 		loc++;
 		
 		std::string output_str = "<Primary> -> false \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -289,49 +298,42 @@ bool procedure_Primary(vector<token_323>& all_tokens, int& loc)
 bool procedure_Factor(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "-")
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "-")
 	{
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
+		var.token_holder = all_tokens[loc];
 		if (procedure_Primary(all_tokens, loc))
 		{
 
 			std::string output_str = "<Factor> -> -<Primary> \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
-
-			return_holder = true;
+			var.return_holder = true;
 		}
 		else
 		{
 			loc-- ;
 			std::cout << "error, expecting <Primary> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else if (procedure_Primary(all_tokens, loc))
 	{
 
 		std::string output_str = "<Factor> -> <Primary> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -343,21 +345,15 @@ bool procedure_Factor(vector<token_323>& all_tokens, int& loc)
 bool procedure_Term_q(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "*")//* <Factor> <Term>'
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "*")//* <Factor> <Term>'
 	{
 
 
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
+		var.token_holder = all_tokens[loc];
 		if (procedure_Factor(all_tokens, loc))
 		{
 			//instruction *
@@ -368,32 +364,32 @@ bool procedure_Term_q(vector<token_323>& all_tokens, int& loc)
 			if (procedure_Term_q(all_tokens, loc))
 			{
 				std::string output_str = "<Term'> -> * <Factor> <Term>' \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Term>' \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Factor> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
-	else if (token_holder.lexeme() == "/")//* <Factor> <Term>'
+	else if (var.token_holder.lexeme() == "/")//* <Factor> <Term>'
 	{
 
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
+		var.token_holder = all_tokens[loc];
 		if (procedure_Factor(all_tokens, loc))
 		{
 			//instruction  /
@@ -404,35 +400,35 @@ bool procedure_Term_q(vector<token_323>& all_tokens, int& loc)
 			if (procedure_Term_q(all_tokens, loc))
 			{
 				std::string output_str = "<Term'> -> / <Factor> <Term>' \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Term>' \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Factor> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else // ϵ
 	{
 		std::string output_str = "<Term'>  -> ϵ \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -442,37 +438,31 @@ bool procedure_Term_q(vector<token_323>& all_tokens, int& loc)
 bool procedure_Term(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+	var_helper var(loc, all_tokens);
+	
 	if (procedure_Factor(all_tokens, loc))
 	{
 		if (procedure_Term_q(all_tokens, loc))
 		{
 
 			std::string output_str = "<Term> -> <Factor> <Term>' \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Term>' \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -482,37 +472,31 @@ bool procedure_Term(vector<token_323>& all_tokens, int& loc)
 bool procedure_Expression(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+	var_helper var(loc, all_tokens);
+	
 	if (procedure_Term(all_tokens, loc))
 	{
 		if (procedure_Expression_q(all_tokens, loc))
 		{
 
 			std::string output_str = "<Expression>  -> <Term> <Expression'> \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Expression'> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -525,15 +509,9 @@ bool procedure_Expression(vector<token_323>& all_tokens, int& loc)
 bool procedure_Expression_q(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "+")//+ <Term> <Expression'>
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "+")//+ <Term> <Expression'>
 	{
 
 		//token_holder.token_print_helper();
@@ -550,27 +528,27 @@ bool procedure_Expression_q(vector<token_323>& all_tokens, int& loc)
 			{
 
 				std::string output_str = "<Expression'>  -> + <Term> <Expression'> \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Expression'> \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Term> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
-	else if (token_holder.lexeme() == "-")//-<Term> < Expression'>
+	else if (var.token_holder.lexeme() == "-")//-<Term> < Expression'>
 	{
 		//token_holder.token_print_helper();
 		loc++;
@@ -585,24 +563,24 @@ bool procedure_Expression_q(vector<token_323>& all_tokens, int& loc)
 			{
 
 				std::string output_str = "<Expression'>  -> - <Term> <Expression'> \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Expression'> \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Term> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
@@ -610,12 +588,12 @@ bool procedure_Expression_q(vector<token_323>& all_tokens, int& loc)
 		
 
 		std::string output_str = "<Expression'>  -> ϵ \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -626,15 +604,9 @@ bool procedure_Expression_q(vector<token_323>& all_tokens, int& loc)
 bool procedure_Relop(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "==")
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "==")
 	{
 		instruction_table temp_ins;
 		temp_ins.new_instruction("EQU", "exchange next");
@@ -644,12 +616,12 @@ bool procedure_Relop(vector<token_323>& all_tokens, int& loc)
 		loc++;
 
 		std::string output_str = "<Relop> -> == \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	else if (token_holder.lexeme() == "!=")
+	else if (var.token_holder.lexeme() == "!=")
 	{
 		instruction_table temp_ins;
 		temp_ins.new_instruction("NEQ", "exchange next");
@@ -659,12 +631,12 @@ bool procedure_Relop(vector<token_323>& all_tokens, int& loc)
 		loc++;
 
 		std::string output_str = "<Relop> -> != \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	else if (token_holder.lexeme() == ">")
+	else if (var.token_holder.lexeme() == ">")
 	{
 		instruction_table temp_ins;
 		temp_ins.new_instruction("GRT", "exchange next");
@@ -674,12 +646,12 @@ bool procedure_Relop(vector<token_323>& all_tokens, int& loc)
 		loc++;
 
 		std::string output_str = "<Relop> -> > \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	else if (token_holder.lexeme() == "<")
+	else if (var.token_holder.lexeme() == "<")
 	{
 		instruction_table temp_ins;
 		temp_ins.new_instruction("LES", "exchange next");
@@ -689,12 +661,12 @@ bool procedure_Relop(vector<token_323>& all_tokens, int& loc)
 		loc++;
 
 		std::string output_str = "<Relop> -> < \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	else if (token_holder.lexeme() == "<=")
+	else if (var.token_holder.lexeme() == "<=")
 	{
 		instruction_table temp_ins;
 
@@ -709,12 +681,12 @@ bool procedure_Relop(vector<token_323>& all_tokens, int& loc)
 		loc++;
 
 		std::string output_str = "<Relop> -> <= \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	else if (token_holder.lexeme() == "=>")
+	else if (var.token_holder.lexeme() == "=>")
 	{
 		instruction_table temp_ins;
 
@@ -730,16 +702,16 @@ bool procedure_Relop(vector<token_323>& all_tokens, int& loc)
 		loc++;
 
 		std::string output_str = "<Relop> -> => \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -751,14 +723,8 @@ bool procedure_Relop(vector<token_323>& all_tokens, int& loc)
 bool procedure_Condition(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+	var_helper var(loc, all_tokens);
+	
 	if (procedure_Expression(all_tokens, loc))
 	{
 		if (procedure_Relop(all_tokens, loc))
@@ -768,31 +734,31 @@ bool procedure_Condition(vector<token_323>& all_tokens, int& loc)
 				
 
 				std::string output_str = "<Condition> -> <Expression> <Relop> <Expression> \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Expression> \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Relop> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -803,15 +769,9 @@ bool procedure_Condition(vector<token_323>& all_tokens, int& loc)
 bool procedure_While(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "while")
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "while")
 	{
 		//label
 		instruction_table temp_ins;
@@ -820,16 +780,16 @@ bool procedure_While(vector<token_323>& all_tokens, int& loc)
 
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == "(")
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == "(")
 		{
 			//token_holder.token_print_helper();
 			loc++;
-			token_holder = all_tokens[loc];
+			var.token_holder = all_tokens[loc];
 			if (procedure_Condition(all_tokens, loc))
 			{
-				token_holder = all_tokens[loc];
-				if (token_holder.lexeme() == ")")
+				var.token_holder = all_tokens[loc];
+				if (var.token_holder.lexeme() == ")")
 				{
 					//jump after cmp
 					instruction_table temp_ins;
@@ -847,10 +807,10 @@ bool procedure_While(vector<token_323>& all_tokens, int& loc)
 
 
 						std::string output_str = "<While> -> while (<Condition>) < Statement > \n";
-						all_tokens[loc_helper].rule_holder.push_back(output_str);
+						all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 						//std::cout << output_str;
 
-						return_holder = true;
+						var.return_holder = true;
 					}
 					else
 					{
@@ -859,7 +819,7 @@ bool procedure_While(vector<token_323>& all_tokens, int& loc)
 						loc--;
 						loc--;
 						std::cout << "error, expecting < Statement > \n";
-						return_holder = false;
+						var.return_holder = false;
 					}
 				}
 				else
@@ -868,7 +828,7 @@ bool procedure_While(vector<token_323>& all_tokens, int& loc)
 					loc--;
 					loc--;
 					std::cout << "error, expecting ) \n";
-					return_holder = false;
+					var.return_holder = false;
 				}
 			}
 			else
@@ -876,21 +836,21 @@ bool procedure_While(vector<token_323>& all_tokens, int& loc)
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Condition> \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting ( \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -901,24 +861,18 @@ bool procedure_While(vector<token_323>& all_tokens, int& loc)
 bool procedure_Scan(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "get")
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "get")
 	{
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == "(")
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == "(")
 		{
 			//token_holder.token_print_helper();
 			loc++;
-			token_holder = all_tokens[loc];
+			var.token_holder = all_tokens[loc];
 			int j = loc;
 			if (procedure_IDs(all_tokens, loc))
 			{
@@ -947,22 +901,22 @@ bool procedure_Scan(vector<token_323>& all_tokens, int& loc)
 
 
 
-				token_holder = all_tokens[loc];
-				if (token_holder.lexeme() == ")")
+				var.token_holder = all_tokens[loc];
+				if (var.token_holder.lexeme() == ")")
 				{
 					//token_holder.token_print_helper();
 					loc++;
-					token_holder = all_tokens[loc];
-					if (token_holder.lexeme() == ";")
+					var.token_holder = all_tokens[loc];
+					if (var.token_holder.lexeme() == ";")
 					{
 						//token_holder.token_print_helper();
 						loc++;
 
 						std::string output_str = "<Scan> -> get(<IDs>); \n";
-						all_tokens[loc_helper].rule_holder.push_back(output_str);
+						all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 						//std::cout << output_str;
 
-						return_holder = true;
+						var.return_holder = true;
 					}
 					else
 					{
@@ -971,7 +925,7 @@ bool procedure_Scan(vector<token_323>& all_tokens, int& loc)
 						loc--;
 						loc--;
 						std::cout << "error, expecting ; \n";
-						return_holder = false;
+						var.return_holder = false;
 					}
 				}
 				else
@@ -980,7 +934,7 @@ bool procedure_Scan(vector<token_323>& all_tokens, int& loc)
 					loc--;
 					loc--;
 					std::cout << "error, expecting ) \n";
-					return_holder = false;
+					var.return_holder = false;
 				}
 			}
 			else
@@ -988,21 +942,21 @@ bool procedure_Scan(vector<token_323>& all_tokens, int& loc)
 				loc--;
 				loc--;
 				std::cout << "error, expecting <IDs> \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting ( \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1012,29 +966,23 @@ bool procedure_Scan(vector<token_323>& all_tokens, int& loc)
 bool procedure_Print(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "put")
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "put")
 	{
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == "(")
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == "(")
 		{
 			//token_holder.token_print_helper();
 			loc++;
 			
-			token_holder = all_tokens[loc];
+			var.token_holder = all_tokens[loc];
 			if (procedure_Expression(all_tokens, loc))
 			{
-				token_holder = all_tokens[loc];
-				if (token_holder.lexeme() == ")")
+				var.token_holder = all_tokens[loc];
+				if (var.token_holder.lexeme() == ")")
 				{
 
 					//token_holder.token_print_helper();
@@ -1044,17 +992,17 @@ bool procedure_Print(vector<token_323>& all_tokens, int& loc)
 					temp_ins.new_instruction("STDOUT", "nil");
 					all_tokens[0].all_instructions.push_back(temp_ins);
 
-					token_holder = all_tokens[loc];
-					if (token_holder.lexeme() == ";")
+					var.token_holder = all_tokens[loc];
+					if (var.token_holder.lexeme() == ";")
 					{
 						//token_holder.token_print_helper();
 						loc++;
 
 						std::string output_str = "<Print> -> put(<Expression>); \n";
-						all_tokens[loc_helper].rule_holder.push_back(output_str);
+						all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 						//std::cout << output_str;
 
-						return_holder = true;
+						var.return_holder = true;
 					}
 					else
 					{
@@ -1063,7 +1011,7 @@ bool procedure_Print(vector<token_323>& all_tokens, int& loc)
 						loc--;
 						loc--;
 						std::cout << "error, expecting ; \n";
-						return_holder = false;
+						var.return_holder = false;
 					}
 				}
 				else
@@ -1072,7 +1020,7 @@ bool procedure_Print(vector<token_323>& all_tokens, int& loc)
 					loc--;
 					loc--;
 					std::cout << "error, expecting ) \n";
-					return_holder = false;
+					var.return_holder = false;
 				}
 			}
 			else
@@ -1080,21 +1028,21 @@ bool procedure_Print(vector<token_323>& all_tokens, int& loc)
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Expression> \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting ( \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1106,64 +1054,58 @@ bool procedure_Print(vector<token_323>& all_tokens, int& loc)
 bool procedure_Return(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "return")
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "return")
 	{
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == ";")
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == ";")
 		{
 			//token_holder.token_print_helper();
 			loc++;
 
 			std::string output_str = "<Return> -> return; \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 		else if (procedure_Expression(all_tokens, loc))
 		{
-			token_holder = all_tokens[loc];
-			if (token_holder.lexeme() == ";")
+			var.token_holder = all_tokens[loc];
+			if (var.token_holder.lexeme() == ";")
 			{
 				//token_holder.token_print_helper();
 				loc++;
 				
 				std::string output_str = "<Return> -> return <Expression>; \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 				
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting ; \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting ; or <Expression> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1174,28 +1116,22 @@ bool procedure_Return(vector<token_323>& all_tokens, int& loc)
 bool procedure_If(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "if")//if 
+	var_helper var(loc, all_tokens);
+	
+	if (var.token_holder.lexeme() == "if")//if 
 	{
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == "(")//  (
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == "(")//  (
 		{
 			//token_holder.token_print_helper();
 			loc++;
-			token_holder = all_tokens[loc];
+			var.token_holder = all_tokens[loc];
 			if (procedure_Condition(all_tokens, loc))//<Condition>
 			{
-				token_holder = all_tokens[loc];
-				if (token_holder.lexeme() == ")")//  ) 
+				var.token_holder = all_tokens[loc];
+				if (var.token_holder.lexeme() == ")")//  ) 
 				{
 					instruction_table temp_ins;
 					temp_ins.new_instruction("JUMPZ", "next label");
@@ -1209,35 +1145,35 @@ bool procedure_If(vector<token_323>& all_tokens, int& loc)
 						temp_ins.new_instruction("LABEL", "nil");
 						all_tokens[0].all_instructions.push_back(temp_ins);
 
-						token_holder = all_tokens[loc];
-						if (token_holder.lexeme() == "fi")//fi
+						var.token_holder = all_tokens[loc];
+						if (var.token_holder.lexeme() == "fi")//fi
 						{
 							//token_holder.token_print_helper();
 							loc++;
 
 							std::string output_str = "<If> -> if (<Condition>) < Statement > fi\n";
-							all_tokens[loc_helper].rule_holder.push_back(output_str);
+							all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 							//std::cout << output_str;
 
-							return_holder = true;
+							var.return_holder = true;
 						}
-						else if (token_holder.lexeme() == "else")// | if (<Condition>) < Statement >.  else  <Statement>  fi , testing if lexeme is else
+						else if (var.token_holder.lexeme() == "else")// | if (<Condition>) < Statement >.  else  <Statement>  fi , testing if lexeme is else
 						{
 							//token_holder.token_print_helper();
 							loc++;
 							if (procedure_Statement(all_tokens, loc))//<Statement>  
 							{
-								token_holder = all_tokens[loc];
-								if (token_holder.lexeme() == "fi")//fi
+								var.token_holder = all_tokens[loc];
+								if (var.token_holder.lexeme() == "fi")//fi
 								{
 									//token_holder.token_print_helper();
 									loc++;
 
 									std::string output_str = "if (<Condition>) < Statement > else  <Statement>  fi \n";
-									all_tokens[loc_helper].rule_holder.push_back(output_str);
+									all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 									//std::cout << output_str;
 
-									return_holder = true;
+									var.return_holder = true;
 								}
 								else
 								{
@@ -1249,7 +1185,7 @@ bool procedure_If(vector<token_323>& all_tokens, int& loc)
 									loc--;
 									loc--;
 									std::cout << "error, expecting fi \n";
-									return_holder = false;
+									var.return_holder = false;
 								}
 							}
 							else
@@ -1261,7 +1197,7 @@ bool procedure_If(vector<token_323>& all_tokens, int& loc)
 								loc--;
 								loc--;
 								std::cout << "error, expecting < Statement >  \n";
-								return_holder = false;
+								var.return_holder = false;
 							}
 						}
 						else
@@ -1272,7 +1208,7 @@ bool procedure_If(vector<token_323>& all_tokens, int& loc)
 							loc--;
 							loc--;
 							std::cout << "error, expecting fi or else  \n";
-							return_holder = false;
+							var.return_holder = false;
 						}
 					}
 					else
@@ -1282,7 +1218,7 @@ bool procedure_If(vector<token_323>& all_tokens, int& loc)
 						loc--;
 						loc--;
 						std::cout << "error, expecting < Statement >  \n";
-						return_holder = false;
+						var.return_holder = false;
 					}
 				}
 				else
@@ -1291,7 +1227,7 @@ bool procedure_If(vector<token_323>& all_tokens, int& loc)
 					loc--;
 					loc--;
 					std::cout << "error, expecting )  \n";
-					return_holder = false;
+					var.return_holder = false;
 				}
 			}
 			else
@@ -1299,21 +1235,21 @@ bool procedure_If(vector<token_323>& all_tokens, int& loc)
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Condition>  \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting ( \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1323,45 +1259,39 @@ bool procedure_If(vector<token_323>& all_tokens, int& loc)
 bool procedure_Assign(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (identifier_helper(token_holder))
+	var_helper var(loc, all_tokens);
+	
+	if (identifier_helper(var.token_holder))
 	{
 		//id saved
-		string temp_token = token_holder.lexeme();
+		string temp_token = var.token_holder.lexeme();
 		
 		//token_holder.token_print_helper();
 		loc++;
 
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == "=")
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == "=")
 		{
 			//token_holder.token_print_helper();
 			loc++;
 			if (procedure_Expression(all_tokens, loc))
 			{
-				token_holder = all_tokens[loc];
+				var.token_holder = all_tokens[loc];
 				//add popm instruction
 				instruction_table temp_ins;
 				temp_ins.new_instruction("POPM", temp_token);
 				all_tokens[0].all_instructions.push_back(temp_ins);
 
-				if (token_holder.lexeme() == ";")
+				if (var.token_holder.lexeme() == ";")
 				{
 					//token_holder.token_print_helper();
 					loc++;
 
 					std::string output_str = "<Identifier> = <Expression>; \n";
-					all_tokens[loc_helper].rule_holder.push_back(output_str);
+					all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 					//std::cout << output_str;
 
-					return_holder = true;
+					var.return_holder = true;
 				}
 				else 
 				{
@@ -1369,7 +1299,7 @@ bool procedure_Assign(vector<token_323>& all_tokens, int& loc)
 					loc--;
 					loc--;
 					std::cout << "error, expecting ; \n";
-					return_holder = false;
+					var.return_holder = false;
 				}
 				
 			}
@@ -1378,27 +1308,27 @@ bool procedure_Assign(vector<token_323>& all_tokens, int& loc)
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Expression> \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			
 			std::cout << "error, expecting = \n";
-			std::cout << token_holder.lexeme() << "\n";
-			token_holder = all_tokens[loc+1];
-			std::cout << token_holder.lexeme() << "\n";
-			token_holder = all_tokens[loc-1];
-			std::cout << token_holder.lexeme() << "\n";
-			return_holder = false;
+			std::cout << var.token_holder.lexeme() << "\n";
+			var.token_holder = all_tokens[loc+1];
+			std::cout << var.token_holder.lexeme() << "\n";
+			var.token_holder = all_tokens[loc-1];
+			std::cout << var.token_holder.lexeme() << "\n";
+			var.return_holder = false;
 			loc--;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1410,53 +1340,46 @@ bool procedure_Assign(vector<token_323>& all_tokens, int& loc)
 bool procedure_Compound(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "{")
+	var_helper var(loc, all_tokens);
+	if (var.token_holder.lexeme() == "{")
 	{
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
+		var.token_holder = all_tokens[loc];
 		if (procedure_Statement_List(all_tokens, loc))
 		{
-			token_holder = all_tokens[loc];
-			if (token_holder.lexeme() == "}")
+			var.token_holder = all_tokens[loc];
+			if (var.token_holder.lexeme() == "}")
 			{
 				//token_holder.token_print_helper();
 				loc++;
 
 				std::string output_str = "<Compound> -> { < Statement List> } \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting } \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting < Statement List> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1469,81 +1392,75 @@ bool procedure_Compound(vector<token_323>& all_tokens, int& loc)
 bool procedure_Statement(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+	var_helper var(loc, all_tokens);
+	
 	if (procedure_Compound(all_tokens, loc))//<Compound> 
 	{
 
 		std::string output_str = "<Statement> -> <Compound> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else if (procedure_Assign(all_tokens, loc))// <Assign> 
 	{
 
 		std::string output_str = "<Statement> -> <Assign> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else if (procedure_If(all_tokens, loc))// <If> 
 	{
 
 		std::string output_str = "<Statement> -> <If>  \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else if (procedure_Return(all_tokens, loc))// <Return> 
 	{
 
 		std::string output_str = "<Statement> -> <Return> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else if (procedure_Print(all_tokens, loc))//<Print> 
 	{
 
 		std::string output_str = "<Statement> -> <Print> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else if (procedure_Scan(all_tokens, loc))// <Scan>  
 	{
 
 		std::string output_str = "<Statement> -> <Scan> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else if (procedure_While(all_tokens, loc))//<While>
 	{
 		std::string output_str = "<Statement> -> <While> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1556,40 +1473,34 @@ bool procedure_Statement(vector<token_323>& all_tokens, int& loc)
 bool procedure_Statement_List(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+	var_helper var(loc, all_tokens);
+	
 	if (procedure_Statement(all_tokens, loc))
 	{
-		token_holder = all_tokens[loc];
+		var.token_holder = all_tokens[loc];
 		if (procedure_Statement_List(all_tokens, loc))
 		{
 
 			std::string output_str = "<Statement List> -> <Statement> <Statement List>\n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 		else
 		{
 			std::string output_str = "<Statement List> -> <Statement> \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1609,38 +1520,32 @@ bool procedure_Statement_List(vector<token_323>& all_tokens, int& loc)
 bool procedure_Declaration(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+	var_helper var(loc, all_tokens);
+	
 	if (procedure_Qualifier(all_tokens, loc))
 	{
-		token_holder = all_tokens[loc];
+		var.token_holder = all_tokens[loc];
 		if (procedure_IDs(all_tokens, loc))
 		{
 
 			std::string output_str = "<Declaration> -> <Qualifier > <IDs> \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <IDs> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1651,53 +1556,47 @@ bool procedure_Declaration(vector<token_323>& all_tokens, int& loc)
 bool procedure_Declaration_List(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+	var_helper var(loc, all_tokens);
+	
 	if (procedure_Declaration(all_tokens, loc))
 	{
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == ";")
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == ";")
 		{
 			//token_holder.token_print_helper();
 			loc++;
-			token_holder = all_tokens[loc];
+			var.token_holder = all_tokens[loc];
 			if (procedure_Declaration_List(all_tokens, loc))
 			{
 
 				std::string output_str = "<Declaration List> -> <Declaration>; <Declaration List> \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 
 				std::string output_str = "<Declaration List> -> <Declaration>; \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting ; \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1709,32 +1608,25 @@ bool procedure_Declaration_List(vector<token_323>& all_tokens, int& loc)
 bool procedure_Opt_Declaration_List(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+	var_helper var(loc, all_tokens);
 	if (procedure_Declaration_List(all_tokens, loc))
 	{
 
 		std::string output_str = "<Opt Declaration List> -> <Declaration List> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else
 	{
 		std::string output_str = "<Opt Declaration List> -> <Empty> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1745,53 +1637,46 @@ bool procedure_Opt_Declaration_List(vector<token_323>& all_tokens, int& loc)
 bool procedure_Body(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
-
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "{")
+	var_helper var(loc, all_tokens);
+	if (var.token_holder.lexeme() == "{")
 	{
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
+		var.token_holder = all_tokens[loc];
 		if (procedure_Statement_List(all_tokens, loc))
 		{
-			token_holder = all_tokens[loc];
-			if (token_holder.lexeme() == "}")
+			var.token_holder = all_tokens[loc];
+			if (var.token_holder.lexeme() == "}")
 			{
 				//token_holder.token_print_helper();
 				loc++;
 
 				std::string output_str = "<Body> -> { < Statement List> } \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting } \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting < Statement List> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1807,55 +1692,60 @@ bool procedure_Body(vector<token_323>& all_tokens, int& loc)
 bool procedure_Qualifier(vector<token_323>& all_tokens, int& loc)//procedure for <Qualifier>
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+	var_helper var(loc, all_tokens);
+	if (var.token_holder.lexeme() == "int")
+	{
+		var.token_holder.token_print_helper();
+		loc++;
 
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
+		std::string output_str = "<Qualifier> -> int \n";
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
+		std::cout << output_str;
 
-		if (token_holder.lexeme() == "int")
-		{
-			//token_holder.token_print_helper();
-			loc++;
+		var.return_holder = true;
+	}
+	else if (var.token_holder.lexeme() == "boolean" || var.token_holder.lexeme() == "bool")
+	{
+		var.token_holder.token_print_helper();
+		loc++;
 
-			std::string output_str = "<Qualifier> -> int \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
-			//std::cout << output_str;
+		std::string output_str = "<Qualifier> -> boolean \n";
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
+		std::cout << output_str;
 
-			return_holder = true;
-		}
-		else if (token_holder.lexeme() == "boolean")
-		{
-			//token_holder.token_print_helper();
-			loc++;
+		var.return_holder = true;
+	}
+	else if (var.token_holder.lexeme() == "real")
+	{
+		var.token_holder.token_print_helper();
+		loc++;
 
-			std::string output_str = "<Qualifier> -> boolean \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
-			//std::cout << output_str;
+		std::string output_str = "<Qualifier> -> real \n";
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
+		std::cout << output_str;
 
-			return_holder = true;
-		}
-		else if (token_holder.lexeme() == "real")
-		{
-			//token_holder.token_print_helper();
-			loc++;
+		var.return_holder = true;
+	}
+	else if (var.token_holder.lexeme() == "char")
+	{
+		var.token_holder.token_print_helper();
+		loc++;
 
-			std::string output_str = "<Qualifier> -> real \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
-			//std::cout << output_str;
+		std::string output_str = "<Qualifier> -> char \n";
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
+		std::cout << output_str;
 
-			return_holder = true;
-		}
-		else
-		{
-			return_holder = false;
-		}
+		var.return_holder = true;
+	}
+	else
+	{
+		var.return_holder = false;
+	}
 
-	return return_holder;
+	return var.return_holder;
 }
+
+
 
 
 
@@ -1868,37 +1758,31 @@ bool procedure_Qualifier(vector<token_323>& all_tokens, int& loc)//procedure for
 bool procedure_Parameter(vector<token_323>& all_tokens, int& loc)//procedure for <Parameter>
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+	var_helper var(loc, all_tokens);
 
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
 	if (procedure_IDs(all_tokens, loc))
 	{
 		if (procedure_Qualifier(all_tokens, loc))
 		{
 
 			std::string output_str = "<Parameter> -> <IDs> <Qualifier> \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Qualifier> \n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1909,18 +1793,12 @@ bool procedure_Parameter(vector<token_323>& all_tokens, int& loc)//procedure for
 bool procedure_Parameter_List(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+	var_helper var(loc, all_tokens);
 
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
 	if (procedure_Parameter(all_tokens, loc))
 	{
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == ",")
+		var.token_holder = all_tokens[loc];
+		if (var.token_holder.lexeme() == ",")
 		{
 			//token_holder.token_print_helper();
 			loc++;
@@ -1928,33 +1806,33 @@ bool procedure_Parameter_List(vector<token_323>& all_tokens, int& loc)
 			{
 
 				std::string output_str = "<Parameter List> -> <Parameter>, <Parameter List> \n";
-				all_tokens[loc_helper].rule_holder.push_back(output_str);
+				all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 				//std::cout << output_str;
 
-				return_holder = true;
+				var.return_holder = true;
 			}
 			else
 			{
 				loc--;
 				loc--;
 				std::cout << "error, expecting <Parameter List> \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else 
 		{
 			std::string output_str = "<Parameter List> -> <Parameter> \n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -1965,31 +1843,25 @@ bool procedure_Parameter_List(vector<token_323>& all_tokens, int& loc)
 bool procedure_Opt_Parameter_List(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+	var_helper var(loc, all_tokens);
 
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
 	if (procedure_Parameter_List(all_tokens, loc))
 	{
 		std::string output_str = "<Opt Parameter List> -> <Parameter List> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else
 	{
 		std::string output_str = "<Opt Parameter List> -> <Empty> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -2001,48 +1873,42 @@ bool procedure_Opt_Parameter_List(vector<token_323>& all_tokens, int& loc)
 bool procedure_Function(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+	var_helper var(loc, all_tokens);
 
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
-	if (token_holder.lexeme() == "function")
+	if (var.token_holder.lexeme() == "function")
 	{
 		//token_holder.token_print_helper();
 		loc++;
-		token_holder = all_tokens[loc];
-		if (identifier_helper(token_holder))
+		var.token_holder = all_tokens[loc];
+		if (identifier_helper(var.token_holder))
 		{
 			//token_holder.token_print_helper();
 			loc++;
-			token_holder = all_tokens[loc];
-			if (token_holder.lexeme() == "(")
+			var.token_holder = all_tokens[loc];
+			if (var.token_holder.lexeme() == "(")
 			{
 				//token_holder.token_print_helper();
 				loc++;
-				token_holder = all_tokens[loc];
+				var.token_holder = all_tokens[loc];
 				if (procedure_Opt_Parameter_List(all_tokens, loc))
 				{
-					token_holder = all_tokens[loc];
-					if (token_holder.lexeme() == ")")
+					var.token_holder = all_tokens[loc];
+					if (var.token_holder.lexeme() == ")")
 					{
 						//token_holder.token_print_helper();
 						loc++;
-						token_holder = all_tokens[loc];
+						var.token_holder = all_tokens[loc];
 						if (procedure_Opt_Declaration_List(all_tokens, loc))
 						{
-							token_holder = all_tokens[loc];
+							var.token_holder = all_tokens[loc];
 							if (procedure_Body(all_tokens, loc))
 							{
 								
 								std::string output_str = "<Function> -> function <Identifier> ( <Opt Parameter List> ) < Opt Declaration List > <Body> \n";
-								all_tokens[loc_helper].rule_holder.push_back(output_str);
+								all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 								//std::cout << output_str;
 								
-								return_holder = true;
+								var.return_holder = true;
 							}
 							else
 							{
@@ -2053,7 +1919,7 @@ bool procedure_Function(vector<token_323>& all_tokens, int& loc)
 								loc--;
 								loc--;
 								std::cout << "error, expecting <Body> \n";
-								return_holder = false;
+								var.return_holder = false;
 							}
 						}
 						else
@@ -2064,7 +1930,7 @@ bool procedure_Function(vector<token_323>& all_tokens, int& loc)
 							loc--;
 							loc--;
 							std::cout << "error, expecting < Opt Declaration List > \n";
-							return_holder = false;
+							var.return_holder = false;
 						}
 					}
 					else
@@ -2074,7 +1940,7 @@ bool procedure_Function(vector<token_323>& all_tokens, int& loc)
 						loc--;
 						loc--;
 						std::cout << "error, expecting ) \n";
-						return_holder = false;
+						var.return_holder = false;
 					}
 				}
 				else
@@ -2083,7 +1949,7 @@ bool procedure_Function(vector<token_323>& all_tokens, int& loc)
 					loc--;
 					loc--;
 					std::cout << "error, expecting <Opt Parameter List> \n";
-					return_holder = false;
+					var.return_holder = false;
 				}
 			}
 			else
@@ -2091,27 +1957,27 @@ bool procedure_Function(vector<token_323>& all_tokens, int& loc)
 				loc--;
 				loc--;
 				std::cout << "error, expecting ( \n";
-				return_holder = false;
+				var.return_holder = false;
 			}
 		}
 		else
 		{
 			loc--;
 			std::cout << "error, expecting <Identifier>\n";
-			return_holder = false;
+			var.return_holder = false;
 		}
 	}
 	else
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
 
-	if (return_holder == true ) 
+	if (var.return_holder == true ) 
 	{
 		std::cout << "Error, Function is not supported by simplified Rat20F\n";
-		return_holder = false;
+		var.return_holder = false;
 	}
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -2124,41 +1990,35 @@ bool procedure_Function(vector<token_323>& all_tokens, int& loc)
 bool procedure_Function_Definitions(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+	var_helper var(loc, all_tokens);
 
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
 	if (procedure_Function(all_tokens, loc))//if <function>?
 	{
 		if (procedure_Function_Definitions(all_tokens, loc))
 		{
 
 			std::string output_str = "<Function Definitions> -> <Function Definitions>\n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 		else
 		{
 
 			std::string output_str = "<Function Definitions> -> <Function>\n";
-			all_tokens[loc_helper].rule_holder.push_back(output_str);
+			all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 			//std::cout << output_str;
 
-			return_holder = true;
+			var.return_holder = true;
 		}
 	}
 	else//not this rule
 	{
-		return_holder = false;
+		var.return_holder = false;
 	}
 
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -2168,34 +2028,28 @@ bool procedure_Function_Definitions(vector<token_323>& all_tokens, int& loc)
 bool procedure_Opt_Function_Definitions(vector<token_323>& all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+	var_helper var(loc, all_tokens);
 
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
 	if (procedure_Function_Definitions(all_tokens, loc))
 	{
 
 		std::string output_str = "<Opt Function Definitions> -> <Function Definitions> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 	else
 	{
 
 		std::string output_str = "<Opt Function Definitions> -> <Empty> \n";
-		all_tokens[loc_helper].rule_holder.push_back(output_str);
+		all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 		//std::cout << output_str;
 
-		return_holder = true;
+		var.return_holder = true;
 	}
 
-	return return_holder;
+	return var.return_holder;
 }
 
 
@@ -2205,19 +2059,14 @@ bool procedure_Opt_Function_Definitions(vector<token_323>& all_tokens, int& loc)
 bool procedure_Rat20F(vector<token_323> & all_tokens, int& loc)
 {
 	//save current location of reading token, and location of rule_holder vector to help push rule if rule is used
-	int loc_helper = loc;
-	int rule_helper = all_tokens[loc].rule_holder.size();
-	std::vector<std::string>::iterator it = all_tokens[loc_helper].rule_holder.begin();
+	var_helper var(loc, all_tokens);
 
-	//get token and test rule
-	bool return_holder = false;
-	token_323 token_holder;
-	token_holder = all_tokens[loc];
 	if (procedure_Opt_Function_Definitions(all_tokens, loc))
 	{
 		//std::cout << "\n" << "test seg 1" << "\n\n";
-		token_holder = all_tokens[loc];
-		if (token_holder.lexeme() == "$$")
+		var.token_holder = all_tokens[loc];
+
+		if (var.token_holder.lexeme() == "$$")
 		{
 			//std::cout << "\n" << "$$" << "\n\n";
 			//std::cout << "\n" << "test seg 2" << "\n\n";
@@ -2230,8 +2079,8 @@ bool procedure_Rat20F(vector<token_323> & all_tokens, int& loc)
 				if (procedure_Statement_List(all_tokens, loc))
 				{
 					//std::cout << "\n" << "test seg 4" << "\n\n";
-					token_holder = all_tokens[loc];
-					if (token_holder.lexeme() == "$$")
+					var.token_holder = all_tokens[loc];
+					if (var.token_holder.lexeme() == "$$")
 					{
 						//std::cout << "\n" << "test seg 5" << "\n\n";
 						//token_holder.token_print_helper();
@@ -2240,7 +2089,7 @@ bool procedure_Rat20F(vector<token_323> & all_tokens, int& loc)
 						{
 						
 							std::string output_str = "<Rat20F> -> <Opt Function Definitions>   $$  <Opt Declaration List>  <Statement List>  $$ \n";
-							all_tokens[loc_helper].rule_holder.push_back(output_str);
+							all_tokens[var.loc_helper].rule_holder.push_back(output_str);
 							//std::cout << output_str;
 							
 							return true;
@@ -2262,7 +2111,7 @@ bool procedure_Rat20F(vector<token_323> & all_tokens, int& loc)
 						loc--;
 						loc--;
 						loc--;
-						return_holder = false;
+						var.return_holder = false;
 						std::cout << "error, expecting $$ \n";
 						//std::cout << "\n" << all_tokens[loc].lexeme() << "\n" << all_tokens[loc -1].lexeme() << "\n"<< all_tokens[loc+1].lexeme() << "\n" << "\n\n";
 					}
@@ -2272,7 +2121,7 @@ bool procedure_Rat20F(vector<token_323> & all_tokens, int& loc)
 					loc--;
 					loc--;
 					loc--;
-					return_holder = false;
+					var.return_holder = false;
 					std::cout << "\nerror, expecting <Statement List> \n\n";
 				}
 			}
@@ -2280,23 +2129,23 @@ bool procedure_Rat20F(vector<token_323> & all_tokens, int& loc)
 			{
 				loc--;
 				loc--;
-				return_holder = false;
+				var.return_holder = false;
 				std::cout << "\nerror, expecting <Opt Declaration List> \n\n";
 			}
 		}
 		else
 		{
 			loc--;
-			return_holder = false;
+			var.return_holder = false;
 			std::cout << "\nerror, expecting $$ \n\n";
 		}
 	}
 	else
 	{
 		std::cout << "\nerror, expecting <Opt Function Definitions> \n\n";
-		return_holder = false;
+		var.return_holder = false;
 	}
 
-	return return_holder;
+	return var.return_holder;
 }
 
